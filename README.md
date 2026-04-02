@@ -60,18 +60,18 @@ Pengguna dapat menekan tombol di sisi A atau B untuk meminta izin menyeberang.
 | YELLOW | 3000 ms |
 
 ## Cara Kerja Sistem
-Kondisi awal:
-- Lampu kendaraan hijau
-- Lampu pedestrian merah
-Saat ditekan:
-- Lampu kendaraan berubah menjadi merah
-- Lampu pedestrian berubah menjadi hijau
-Setelah waktu tertentu:
-- Lampu pedestrian kembali merah
-- Lampu kendaraan memasuki fase kuning (transisi)
-Sistem kembali ke kondisi awal:
-- Lampu kendaraan hijau
-- Lampu pedestrian tetap merah
+- Kondisi awal:
+  - Lampu kendaraan hijau
+  - Lampu pedestrian merah
+- Saat ditekan:
+  - Lampu kendaraan berubah menjadi merah
+  - Lampu pedestrian berubah menjadi hijau
+- Setelah waktu tertentu:
+  - Lampu pedestrian kembali merah
+  - Lampu kendaraan memasuki fase kuning (transisi)
+- Sistem kembali ke kondisi awal:
+  - Lampu kendaraan hijau
+  - Lampu pedestrian tetap merah
 
 ## Konsep yang Digunakan
 - Finite State Machine
