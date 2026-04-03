@@ -4,27 +4,40 @@ const int VEH_YELLOW = 5;
 const int VEH_GREEN  = 4;
 const int PED_A_RED   = 8;
 const int PED_A_GREEN = 7;
-const int PED_B_RED   = 3;
-const int PED_B_GREEN = 2;
-const int BUTTON_A = 10;
-const int BUTTON_B = 9;
+const int PED_B_RED   = 10;
+const int PED_B_GREEN = 9;
+const int BUTTON_A = 3;
+const int BUTTON_B = 2;
 
 // === TIMING (ms) ===
-const unsigned long WALK_DURATION   = 6000;
-const unsigned long BLINK_INTERVAL  = 400;
-const int           BLINK_MAX       = 3;
+const unsigned long WALK_DURATION  = 6000;
+const unsigned long BLINK_INTERVAL = 400;
+const int           BLINK_MAX      = 3;
 
 // === STATE MACHINE ===
 enum State { IDLE, WALK, YELLOW };
-State currentState = IDLE;
+volatile State currentState = IDLE;
 unsigned long stateStartTime = 0;
-bool reqA = false;
-bool reqB = false;
+volatile bool reqA = false;
+volatile bool reqB = false;
 
 // === BLINK TRACKING ===
 int  blinkCount     = 0;
 bool blinkOn        = false;
 unsigned long lastBlinkTime = 0;
+
+// === ISR: Interrupt Service Routine ===
+void ISR_ButtonA() {
+  if (currentState == IDLE) {
+    reqA = true;
+  }
+}
+
+void ISR_ButtonB() {
+  if (currentState == IDLE) {
+    reqB = true;
+  }
+}
 
 void setup() {
   pinMode(VEH_RED,    OUTPUT);
@@ -36,6 +49,10 @@ void setup() {
   pinMode(PED_B_GREEN, OUTPUT);
   pinMode(BUTTON_A, INPUT_PULLUP);
   pinMode(BUTTON_B, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(BUTTON_A), ISR_ButtonA, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_B), ISR_ButtonB, FALLING);
+
   setIdle();
   Serial.begin(9600);
   Serial.println("Sistem aktif - Kondisi awal");
@@ -45,16 +62,6 @@ void loop() {
   unsigned long now = millis();
 
   if (currentState == IDLE) {
-    if (digitalRead(BUTTON_A) == LOW && !reqA) {
-      delay(50);
-      reqA = true;
-      Serial.println("[REQ] Tombol A ditekan");
-    }
-    if (digitalRead(BUTTON_B) == LOW && !reqB) {
-      delay(50);
-      reqB = true;
-      Serial.println("[REQ] Tombol B ditekan");
-    }
     if (reqA || reqB) {
       startWalk();
     }
@@ -119,12 +126,10 @@ void startYellow() {
   digitalWrite(PED_A_GREEN, LOW);
   digitalWrite(PED_B_RED,   HIGH);
   digitalWrite(PED_B_GREEN, LOW);
-
   blinkCount    = 0;
   blinkOn       = false;
   lastBlinkTime = millis();
   digitalWrite(VEH_YELLOW, LOW);
-
   currentState   = YELLOW;
   stateStartTime = millis();
   Serial.println("[YELLOW] Mulai kedip 3x | Penyebrang MERAH");
